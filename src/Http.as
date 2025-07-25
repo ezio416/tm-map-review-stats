@@ -2,8 +2,7 @@
 // m 2025-07-25
 
 namespace Http {
-    // const string edevBaseUrl    = "https://e416.dev/api2/tm/map-review";
-    const string edevBaseUrl    = "http://10.0.0.178:5000/api2/tm/map-review";
+    const string edevBaseUrl    = "https://e416.dev/api2/tm/map-review";
     int64        lastSummaryGet = 0;
     bool         requesting     = false;
 
