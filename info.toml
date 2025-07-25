@@ -1,9 +1,9 @@
 [meta]
 name = "Map Review Stats"
 author = "Ezio"
-category = "Developer"
+category = "Map Editor"
 version = "0.1.0"
 siteid = 746
 
 [script]
-dependencies = [ "NadeoServices", "MLFeedRaceData" ]
+dependencies = [ "NadeoServices" ]

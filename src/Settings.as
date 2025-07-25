@@ -1,5 +1,5 @@
 // c 2025-07-24
-// m 2025-07-24
+// m 2025-07-25
 
 [Setting category="General" name="Enabled"]
 bool S_Enabled = true;
@@ -9,3 +9,6 @@ bool S_HideWithGame = true;
 
 [Setting category="General" name="Show/hide with Openplanet UI"]
 bool S_HideWithOP = false;
+
+[Setting category="General" name="Show debug tab"]
+bool S_Debug = false;

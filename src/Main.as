@@ -1,34 +1,18 @@
 // c 2025-07-24
 // m 2025-07-25
 
-const string  pluginColor = "\\$F0A";
-const string  pluginIcon  = Icons::Code;
+const string  pluginColor = "\\$EE0";
+const string  pluginIcon  = Icons::Star;
 Meta::Plugin@ pluginMeta  = Meta::ExecutingPlugin();
 const string  pluginTitle = pluginColor + pluginIcon + "\\$G " + pluginMeta.Name;
 
-// const string edevBaseUrl      = "https://e416.dev/api2/tm/map-review";
-const string edevBaseUrl      = "http://10.0.0.178:5000/api2/tm/map-review";
-ReviewType   lastReviewType   = ReviewType::None;
-string       serverLogin;
-Token        token;
-bool         waitingForServer = false;
-
-enum HttpResponse {
-    OK              = 200,
-    BadRequest      = 400,
-    Unauthorized    = 401,
-    Forbidden       = 403,
-    NotFound        = 404,
-    Timeout         = 408,
-    UpgradeRequired = 426,
-    InternalError   = 500
-}
-
-enum ReviewType {
-    Totd,
-    Weekly,
-    None
-}
+ReviewType  lastReviewType   = ReviewType::None;
+string      serverLogin;
+Json::Value submissionsTotd;
+Json::Value submissionsWeekly;
+Json::Value summary;
+Token       token;
+bool        waitingForServer = false;
 
 void Main() {
     OnEnabled();
@@ -39,9 +23,13 @@ void Main() {
     }
 
     if (!token.valid) {
-        error("failed to get token, plugin is now inactive");
+        const string msg = "failed to get token, plugin is now inactive";
+        error(msg);
+        UI::ShowNotification(pluginTitle, msg, vec4(0.8f, 0.2f, 0.0f, 0.8f));
         return;
     }
+
+    Http::Nadeo::InitAsync();
 
     bool inReview, wasInReview = false;
 
@@ -112,138 +100,73 @@ void RenderMenu() {
 }
 
 void RenderWindow() {
-    UI::Text("last review type: " + tostring(lastReviewType));
-    UI::Text("server login: "     + serverLogin);
-    UI::Text("token valid: "      + token.valid);
-    UI::Text("waiting: "          + waitingForServer);
+    UI::BeginTabBar("##tabs");
 
-    UI::Text("in review: "        + InMapReview());
-    UI::Text("in totd review: "   + InMapReviewTotd());
-    UI::Text("in weekly review: " + InMapReviewWeekly());
-}
-
-// Json::Value@ GetAsync() {
-//     Net::HttpRequest@ req = Net::HttpGet(edevBaseUrl);
-//     while (!req.Finished()) {
-//         yield();
-//     }
-
-//     try {
-//         return req.Json();
-//     } catch {
-//         warn("error parsing GET: " + getExceptionInfo());
-//         return Json::Value();
-//     }
-// }
-
-bool InMapReview() {
-    auto App = cast<CTrackMania>(GetApp());
-    auto Network = cast<CTrackManiaNetwork>(App.Network);
-    auto ServerInfo = cast<CTrackManiaNetworkServerInfo>(Network.ServerInfo);
-
-    const bool ret = true
-        and cast<CSmArenaClient>(App.CurrentPlayground) !is null
-        and App.PlaygroundScript is null
-        and App.RootMap !is null
-        and ServerInfo.CurGameModeStr == "TM_TimeAttack_Online"
-        and ServerInfo.ServerName == "Map Test"  // could be spoofed
-    ;
-
-    if (true
-        and ret
-        and waitingForServer
-        and ServerInfo.ServerLogin == serverLogin
-    ) {
-        waitingForServer = false;
-    }
-
-    return ret;
-}
-
-bool InMapReviewTotd() {
-    return true
-        and InMapReview()
-        and lastReviewType == ReviewType::Totd
-    ;
-}
-
-bool InMapReviewWeekly() {
-    return true
-        and InMapReview()
-        and lastReviewType == ReviewType::Weekly
-    ;
-}
-
-void OnJoinReviewAsync() {
-    auto App = cast<CTrackMania>(GetApp());
-
-    if (true
-        and App.RootMap !is null
-        and App.RootMap.MapInfo !is null
-    ) {
-        SendMapInfoAsync(
-            App.RootMap.TMObjective_AuthorTime,
-            App.RootMap.MapInfo.NameForUi,
-            App.RootMap.EdChallengeId,
-            lastReviewType
+    if (UI::BeginTabItem(Icons::ListOl + " Summary")) {
+        UI::BeginDisabled(false
+            or Http::requesting
+            or Time::Stamp - Http::lastSummaryGet < 60
         );
-    }
-}
+        if (UI::Button((summary.GetType() == Json::Type::Unknown ? Icons::Download + " Get" : Icons::Refresh + " Refresh") + " Summary")) {
+            startnew(Http::GetSummaryAsync);
+        }
+        UI::EndDisabled();
 
-void SendMapInfoAsync(const uint authorTime, const string&in mapName, const string&in mapUid, const ReviewType type) {
-    Json::Value body = Json::Object();
-    body["authorTime"] = authorTime;
-    body["mapName"] = Text::StripFormatCodes(mapName).Trim();
-    body["mapUid"] = mapUid;
-    body["reviewType"] = tostring(type);
-
-    trace("sending map info: " + Json::Write(body));
-
-    body["token"] = token.token;
-
-    Net::HttpRequest@ req = Net::HttpPost(edevBaseUrl, Json::Write(body), "application/json");
-    while (!req.Finished()) {
-        yield();
-    }
-
-    const int code = req.ResponseCode();
-    switch (code) {
-        case HttpResponse::OK:
-            trace("sent map info");
-            break;
-
-        default:
-            warn("error sending map info: " + code + ": " + req.String().Replace("\n", "\\n"));
-            return;
-    }
-}
-
-void WaitForServerAsync() {
-    if (waitingForServer) {
-        return;
-    }
-    waitingForServer = true;
-
-    const uint64 maxWait   = 15000;
-    const uint64 sleepTime = 4800;
-    const uint64 start     = Time::Now;
-
-    while (true) {
-        trace("waiting for server...");
-
-        InMapReview();
-
-        if (!waitingForServer) {
-            break;
+        if (summary.GetType() == Json::Type::Object) {
+            UI::Text(Json::Write(summary, true));
         }
 
-        if (Time::Now - start > maxWait) {
-            warn("didn't join server after " + maxWait + "ms");
-            lastReviewType = ReviewType::None;
-            waitingForServer = false;
-            break;
+        UI::EndTabItem();
+    }
+
+    if (UI::BeginTabItem(Icons::UserO + " My Submissions")) {
+        UI::BeginTabBar("##tabs-mine");
+
+        if (UI::BeginTabItem(Icons::Calendar + " Track of the Day")) {
+            if (UI::Button((submissionsTotd.GetType() == Json::Type::Unknown ? Icons::Download + " Get" : Icons::Refresh + " Refresh") + " Submissions")) {
+                startnew(Http::Nadeo::GetMySubmissionsAsync, int(ReviewType::Totd));
+            }
+
+            if (submissionsTotd.GetType() == Json::Type::Object) {
+                UI::Text(Json::Write(submissionsTotd, true));
+            }
+
+            UI::EndTabItem();
         }
 
-        sleep(sleepTime);
+        if (UI::BeginTabItem(Icons::CalendarO + " Weekly Shorts")) {
+            if (UI::Button((submissionsWeekly.GetType() == Json::Type::Unknown ? Icons::Download + " Get" : Icons::Refresh + " Refresh") + " Submissions")) {
+                startnew(Http::Nadeo::GetMySubmissionsAsync, int(ReviewType::Weekly));
+            }
+
+            if (submissionsWeekly.GetType() == Json::Type::Object) {
+                UI::Text(Json::Write(submissionsWeekly, true));
+            }
+
+            UI::EndTabItem();
+        }
+
+        UI::EndTabBar();
+        UI::EndTabItem();
     }
+
+    if (true
+        and S_Debug
+        and UI::BeginTabItem(Icons::Bug + " Debug")
+    ) {
+        UI::Text("last review type: " + tostring(lastReviewType));
+        UI::Text("server login: "     + serverLogin);
+        UI::Text("token valid: "      + token.valid);
+        UI::Text("waiting: "          + waitingForServer);
+
+        UI::Text("in review: "        + InMapReview());
+        UI::Text("in totd review: "   + InMapReviewTotd());
+        UI::Text("in weekly review: " + InMapReviewWeekly());
+
+        UI::Text("summary: " + Json::Write(summary, true));
+
+        UI::EndTabItem();
+    }
+
+    UI::EndTabBar();
 }
