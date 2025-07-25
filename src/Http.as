@@ -298,10 +298,31 @@ namespace Http {
 
             switch (Type) {
                 case ReviewType::Totd:
-                    submissionsTotd = ret;
+                    submissionsTotd = {};
+                    submissionsTotdRaw = ret;
                     break;
                 case ReviewType::Weekly:
-                    submissionsWeekly = ret;
+                    submissionsWeekly = {};
+                    submissionsWeeklyRaw = ret;
+                    break;
+            }
+
+            if (ret["submittedMaps"].GetType() == Json::Type::Array) {
+                for (uint i = 0; i < ret["submittedMaps"].Length; i++) {
+                    try {
+                        auto map = Submission(ret["submittedMaps"][i]);
+                        switch (Type) {
+                            case ReviewType::Totd:
+                                submissionsTotd.InsertLast(map);
+                                break;
+                            case ReviewType::Weekly:
+                                submissionsWeekly.InsertLast(map);
+                                break;
+                        }
+                    } catch {
+                        warn("error parsing map: " + getExceptionInfo() + " | " + Json::Write(ret["submittedMaps"][i]));
+                    }
+                }
             }
         }
 

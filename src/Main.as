@@ -6,13 +6,15 @@ const string  pluginIcon  = Icons::Star;
 Meta::Plugin@ pluginMeta  = Meta::ExecutingPlugin();
 const string  pluginTitle = pluginColor + pluginIcon + "\\$G " + pluginMeta.Name;
 
-ReviewType  lastReviewType   = ReviewType::None;
-string      serverLogin;
-Json::Value submissionsTotd;
-Json::Value submissionsWeekly;
-Json::Value summary;
-Token       token;
-bool        waitingForServer = false;
+ReviewType    lastReviewType   = ReviewType::None;
+string        serverLogin;
+Submission@[] submissionsTotd;
+Json::Value   submissionsTotdRaw;
+Submission@[] submissionsWeekly;
+Json::Value   submissionsWeeklyRaw;
+Json::Value   summary;
+Token         token;
+bool          waitingForServer = false;
 
 void Main() {
     OnEnabled();
@@ -124,24 +126,38 @@ void RenderWindow() {
         UI::BeginTabBar("##tabs-mine");
 
         if (UI::BeginTabItem(Icons::Calendar + " Track of the Day")) {
-            if (UI::Button((submissionsTotd.GetType() == Json::Type::Unknown ? Icons::Download + " Get" : Icons::Refresh + " Refresh") + " Submissions")) {
+            UI::BeginDisabled(Http::Nadeo::requesting);
+            if (UI::Button((submissionsTotd.Length == 0 ? Icons::Download + " Get" : Icons::Refresh + " Refresh") + " Submissions")) {
                 startnew(Http::Nadeo::GetMySubmissionsAsync, int(ReviewType::Totd));
             }
+            UI::EndDisabled();
 
-            if (submissionsTotd.GetType() == Json::Type::Object) {
-                UI::Text(Json::Write(submissionsTotd, true));
+            for (uint i = 0; i < submissionsTotd.Length; i++) {
+                Submission@ map = submissionsTotd[i];
+                if (UI::TreeNode(map.nameStripped + "##" + i)) {
+                    ;
+
+                    UI::TreePop();
+                }
             }
 
             UI::EndTabItem();
         }
 
         if (UI::BeginTabItem(Icons::CalendarO + " Weekly Shorts")) {
-            if (UI::Button((submissionsWeekly.GetType() == Json::Type::Unknown ? Icons::Download + " Get" : Icons::Refresh + " Refresh") + " Submissions")) {
+            UI::BeginDisabled(Http::Nadeo::requesting);
+            if (UI::Button((submissionsWeekly.Length == 0 ? Icons::Download + " Get" : Icons::Refresh + " Refresh") + " Submissions")) {
                 startnew(Http::Nadeo::GetMySubmissionsAsync, int(ReviewType::Weekly));
             }
+            UI::EndDisabled();
 
-            if (submissionsWeekly.GetType() == Json::Type::Object) {
-                UI::Text(Json::Write(submissionsWeekly, true));
+            for (uint i = 0; i < submissionsWeekly.Length; i++) {
+                Submission@ map = submissionsWeekly[i];
+                if (UI::TreeNode(map.nameStripped + "##" + i)) {
+                    ;
+
+                    UI::TreePop();
+                }
             }
 
             UI::EndTabItem();
@@ -160,11 +176,26 @@ void RenderWindow() {
         UI::Text("token valid: "      + token.valid);
         UI::Text("waiting: "          + waitingForServer);
 
+        UI::Separator();
+
         UI::Text("in review: "        + InMapReview());
         UI::Text("in totd review: "   + InMapReviewTotd());
         UI::Text("in weekly review: " + InMapReviewWeekly());
 
-        UI::Text("summary: " + Json::Write(summary, true));
+        if (UI::TreeNode("\\$0FFsummary")) {
+            UI::Text(Json::Write(summary, true));
+            UI::TreePop();
+        }
+
+        if (UI::TreeNode("\\$0FFsubmissions (totd)")) {
+            UI::Text(Json::Write(submissionsTotdRaw, true));
+            UI::TreePop();
+        }
+
+        if (UI::TreeNode("\\$0FFsubmissions (weekly)")) {
+            UI::Text(Json::Write(submissionsWeeklyRaw, true));
+            UI::TreePop();
+        }
 
         UI::EndTabItem();
     }
