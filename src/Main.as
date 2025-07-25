@@ -103,12 +103,15 @@ void RenderMenu() {
 }
 
 void RenderWindow() {
+    const float scale = UI::GetScale();
+
     UI::BeginTabBar("##tabs");
 
     if (UI::BeginTabItem(Icons::ListOl + " Summary")) {
         UI::BeginDisabled(false
             or Http::requesting
             or Time::Stamp - Http::lastSummaryGet < 60
+            or !token.valid
         );
         if (UI::Button((summary.GetType() == Json::Type::Unknown ? Icons::Download + " Get" : Icons::Refresh + " Refresh") + " Summary")) {
             startnew(Http::GetSummaryAsync);
@@ -116,7 +119,97 @@ void RenderWindow() {
         UI::EndDisabled();
 
         if (summary.GetType() == Json::Type::Object) {
-            UI::Text(Json::Write(summary, true));
+            if (UI::TreeNode(pluginColor + "Track of the Day")) {
+                if (UI::BeginTable("##table-summary-totd", 2, UI::TableFlags::RowBg)) {
+                    UI::PushStyleColor(UI::Col::TableRowBgAlt, vec4(vec3(), 0.5f));
+                    UI::TableSetupColumn("Timeframe", UI::TableColumnFlags::WidthFixed, scale * 100.0f);
+                    UI::TableSetupColumn("Total",     UI::TableColumnFlags::WidthFixed, scale * 50.0f);
+                    UI::TableHeadersRow();
+
+                    UI::TableNextRow();
+                    UI::TableNextColumn();
+                    UI::Text("24 Hours");
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["t"]["1d"])));
+
+                    UI::TableNextRow();
+                    UI::TableNextColumn();
+                    UI::Text("7 Days");
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["t"]["7d"])));
+
+                    UI::TableNextRow();
+                    UI::TableNextColumn();
+                    UI::Text("30 Days");
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["t"]["30d"])));
+
+                    UI::PopStyleColor();
+                    UI::EndTable();
+                }
+
+                UI::TreePop();
+            }
+
+            if (UI::TreeNode(pluginColor + "Weekly Shorts")) {
+                if (UI::BeginTable("##table-summary-weekly", 6, UI::TableFlags::RowBg)) {
+                    UI::PushStyleColor(UI::Col::TableRowBgAlt, vec4(vec3(), 0.5f));
+                    UI::TableSetupColumn("Timeframe", UI::TableColumnFlags::WidthFixed, scale * 100.0f);
+                    UI::TableSetupColumn("#1",        UI::TableColumnFlags::WidthFixed, scale * 50.0f);
+                    UI::TableSetupColumn("#2",        UI::TableColumnFlags::WidthFixed, scale * 50.0f);
+                    UI::TableSetupColumn("#3",        UI::TableColumnFlags::WidthFixed, scale * 50.0f);
+                    UI::TableSetupColumn("#4",        UI::TableColumnFlags::WidthFixed, scale * 50.0f);
+                    UI::TableSetupColumn("#5",        UI::TableColumnFlags::WidthFixed, scale * 50.0f);
+                    UI::TableHeadersRow();
+
+                    UI::TableNextRow();
+                    UI::TableNextColumn();
+                    UI::Text("24 Hours");
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["w"]["1d"][0])));
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["w"]["1d"][1])));
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["w"]["1d"][2])));
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["w"]["1d"][3])));
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["w"]["1d"][4])));
+
+                    UI::TableNextRow();
+                    UI::TableNextColumn();
+                    UI::Text("7 Days");
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["w"]["7d"][0])));
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["w"]["7d"][1])));
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["w"]["7d"][2])));
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["w"]["7d"][3])));
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["w"]["7d"][4])));
+
+                    UI::TableNextRow();
+                    UI::TableNextColumn();
+                    UI::Text("30 Days");
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["w"]["30d"][0])));
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["w"]["30d"][1])));
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["w"]["30d"][2])));
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["w"]["30d"][3])));
+                    UI::TableNextColumn();
+                    UI::Text(tostring(int(summary["w"]["30d"][4])));
+
+                    UI::PopStyleColor();
+                    UI::EndTable();
+                }
+
+                UI::TreePop();
+            }
         }
 
         UI::EndTabItem();
