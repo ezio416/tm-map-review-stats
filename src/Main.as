@@ -38,6 +38,7 @@ void Main() {
 
         if (!S_Enabled) {
             inReview = false;
+            wasInReview = false;
             continue;
         }
 
