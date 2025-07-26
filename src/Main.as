@@ -108,57 +108,60 @@ void RenderWindow() {
     UI::BeginTabBar("##tabs");
 
     if (UI::BeginTabItem(Icons::ListOl + " Summary")) {
-        UI::BeginDisabled(false
-            or Http::requesting
-            or Time::Stamp - Http::lastSummaryGet < 60
-            or !token.valid
-        );
-        if (UI::Button((summary.GetType() == Json::Type::Unknown ? Icons::Download + " Get" : Icons::Refresh + " Refresh") + " Summary")) {
-            startnew(Http::GetSummaryAsync);
-        }
-        UI::EndDisabled();
+        if (UI::BeginChild("##child-summary")) {
+            UI::BeginDisabled(false
+                or Http::requesting
+                or Time::Stamp - Http::lastSummaryGet < 60
+                or !token.valid
+            );
+            if (UI::Button((summary.GetType() == Json::Type::Unknown ? Icons::Download + " Get" : Icons::Refresh + " Refresh") + " Summary")) {
+                startnew(Http::GetSummaryAsync);
+            }
+            UI::EndDisabled();
 
-        if (summary.GetType() == Json::Type::Object) {
-            if (UI::TreeNode("Track of the Day", UI::TreeNodeFlags::Framed)) {
-                if (UI::BeginTable("##table-summary-totd", 2, UI::TableFlags::RowBg)) {
-                    UI::PushStyleColor(UI::Col::TableRowBgAlt, vec4(vec3(), 0.5f));
-                    UI::TableSetupColumn("Timeframe", UI::TableColumnFlags::WidthFixed, scale * 100.0f);
-                    UI::TableSetupColumn("Total",     UI::TableColumnFlags::WidthFixed, scale * 50.0f);
-                    // UI::TableHeadersRow();
+            if (summary.GetType() == Json::Type::Object) {
+                if (UI::TreeNode("Track of the Day", UI::TreeNodeFlags::Framed)) {
+                    if (UI::BeginTable("##table-summary-totd", 2, UI::TableFlags::RowBg)) {
+                        UI::PushStyleColor(UI::Col::TableRowBgAlt, vec4(vec3(), 0.5f));
+                        UI::TableSetupColumn("Timeframe", UI::TableColumnFlags::WidthFixed, scale * 100.0f);
+                        UI::TableSetupColumn("Total",     UI::TableColumnFlags::WidthFixed, scale * 50.0f);
+                        // UI::TableHeadersRow();
 
-                    UI::TableNextRow();
-                    UI::TableNextColumn();
-                    UI::Text("24 Hours");
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["t"]["1d"])));
+                        UI::TableNextRow();
+                        UI::TableNextColumn();
+                        UI::Text("24 Hours");
+                        UI::TableNextColumn();
+                        UI::Text(tostring(int(summary["t"]["1d"])));
 
-                    UI::TableNextRow();
-                    UI::TableNextColumn();
-                    UI::Text("7 Days");
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["t"]["7d"])));
+                        UI::TableNextRow();
+                        UI::TableNextColumn();
+                        UI::Text("7 Days");
+                        UI::TableNextColumn();
+                        UI::Text(tostring(int(summary["t"]["7d"])));
 
-                    UI::TableNextRow();
-                    UI::TableNextColumn();
-                    UI::Text("30 Days");
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["t"]["30d"])));
+                        UI::TableNextRow();
+                        UI::TableNextColumn();
+                        UI::Text("30 Days");
+                        UI::TableNextColumn();
+                        UI::Text(tostring(int(summary["t"]["30d"])));
 
-                    UI::PopStyleColor();
-                    UI::EndTable();
+                        UI::PopStyleColor();
+                        UI::EndTable();
+                    }
+
+                    UI::TreePop();
                 }
 
-                UI::TreePop();
-            }
+                if (UI::TreeNode("Weekly Shorts", UI::TreeNodeFlags::Framed)) {
+                    RenderWeeklyCounts("24 Hours", "1d");
+                    RenderWeeklyCounts("7 Days",   "7d");
+                    RenderWeeklyCounts("30 Days",  "30d");
 
-            if (UI::TreeNode("Weekly Shorts", UI::TreeNodeFlags::Framed)) {
-                RenderWeeklyCounts("24 Hours", "1d");
-                RenderWeeklyCounts("7 Days",   "7d");
-                RenderWeeklyCounts("30 Days",  "30d");
-
-                UI::TreePop();
+                    UI::TreePop();
+                }
             }
         }
+        UI::EndChild();
 
         UI::EndTabItem();
     }
@@ -167,37 +170,43 @@ void RenderWindow() {
         UI::BeginTabBar("##tabs-mine");
 
         if (UI::BeginTabItem(Icons::Calendar + " Track of the Day")) {
-            UI::BeginDisabled(Http::Nadeo::requesting);
-            if (UI::Button((submissionsTotd.Length == 0 ? Icons::Download + " Get" : Icons::Refresh + " Refresh") + " Submissions")) {
-                startnew(Http::Nadeo::GetMySubmissionsAsync, int(ReviewType::Totd));
-            }
-            UI::EndDisabled();
+            if (UI::BeginChild("##child-sub-totd")) {
+                UI::BeginDisabled(Http::Nadeo::requesting);
+                if (UI::Button((submissionsTotd.Length == 0 ? Icons::Download + " Get" : Icons::Refresh + " Refresh") + " Submissions")) {
+                    startnew(Http::Nadeo::GetMySubmissionsAsync, int(ReviewType::Totd));
+                }
+                UI::EndDisabled();
 
-            for (uint i = 0; i < submissionsTotd.Length; i++) {
-                Submission@ map = submissionsTotd[i];
-                if (UI::TreeNode(map.nameStripped + "##" + i, UI::TreeNodeFlags::Framed)) {
-                    RenderSubmission(map);
-                    UI::TreePop();
+                for (uint i = 0; i < submissionsTotd.Length; i++) {
+                    Submission@ map = submissionsTotd[i];
+                    if (UI::TreeNode(map.nameStripped + "##" + i, UI::TreeNodeFlags::Framed)) {
+                        RenderSubmission(map);
+                        UI::TreePop();
+                    }
                 }
             }
+            UI::EndChild();
 
             UI::EndTabItem();
         }
 
         if (UI::BeginTabItem(Icons::CalendarO + " Weekly Shorts")) {
-            UI::BeginDisabled(Http::Nadeo::requesting);
-            if (UI::Button((submissionsWeekly.Length == 0 ? Icons::Download + " Get" : Icons::Refresh + " Refresh") + " Submissions")) {
-                startnew(Http::Nadeo::GetMySubmissionsAsync, int(ReviewType::Weekly));
-            }
-            UI::EndDisabled();
+            if (UI::BeginChild("##child-sub-weekly")) {
+                UI::BeginDisabled(Http::Nadeo::requesting);
+                if (UI::Button((submissionsWeekly.Length == 0 ? Icons::Download + " Get" : Icons::Refresh + " Refresh") + " Submissions")) {
+                    startnew(Http::Nadeo::GetMySubmissionsAsync, int(ReviewType::Weekly));
+                }
+                UI::EndDisabled();
 
-            for (uint i = 0; i < submissionsWeekly.Length; i++) {
-                Submission@ map = submissionsWeekly[i];
-                if (UI::TreeNode(map.nameStripped + "##" + i, UI::TreeNodeFlags::Framed)) {
-                    RenderSubmission(map);
-                    UI::TreePop();
+                for (uint i = 0; i < submissionsWeekly.Length; i++) {
+                    Submission@ map = submissionsWeekly[i];
+                    if (UI::TreeNode(map.nameStripped + "##" + i, UI::TreeNodeFlags::Framed)) {
+                        RenderSubmission(map);
+                        UI::TreePop();
+                    }
                 }
             }
+            UI::EndChild();
 
             UI::EndTabItem();
         }
@@ -210,31 +219,34 @@ void RenderWindow() {
         and S_Debug
         and UI::BeginTabItem(Icons::Bug + " Debug")
     ) {
-        UI::Text("last review type: " + tostring(lastReviewType));
-        UI::Text("server login: "     + serverLogin);
-        UI::Text("token valid: "      + token.valid);
-        UI::Text("waiting: "          + waitingForServer);
+        if (UI::BeginChild("##child-debug")) {
+            UI::Text("last review type: " + tostring(lastReviewType));
+            UI::Text("server login: "     + serverLogin);
+            UI::Text("token valid: "      + token.valid);
+            UI::Text("waiting: "          + waitingForServer);
 
-        UI::Separator();
+            UI::Separator();
 
-        UI::Text("in review: "        + InMapReview());
-        UI::Text("in totd review: "   + InMapReviewTotd());
-        UI::Text("in weekly review: " + InMapReviewWeekly());
+            UI::Text("in review: "        + InMapReview());
+            UI::Text("in totd review: "   + InMapReviewTotd());
+            UI::Text("in weekly review: " + InMapReviewWeekly());
 
-        if (UI::TreeNode("summary", UI::TreeNodeFlags::Framed)) {
-            UI::Text(Json::Write(summary, true));
-            UI::TreePop();
+            if (UI::TreeNode("summary", UI::TreeNodeFlags::Framed)) {
+                UI::Text(Json::Write(summary, true));
+                UI::TreePop();
+            }
+
+            if (UI::TreeNode("submissions (totd)", UI::TreeNodeFlags::Framed)) {
+                UI::Text(Json::Write(submissionsTotdRaw, true));
+                UI::TreePop();
+            }
+
+            if (UI::TreeNode("submissions (weekly)", UI::TreeNodeFlags::Framed)) {
+                UI::Text(Json::Write(submissionsWeeklyRaw, true));
+                UI::TreePop();
+            }
         }
-
-        if (UI::TreeNode("submissions (totd)", UI::TreeNodeFlags::Framed)) {
-            UI::Text(Json::Write(submissionsTotdRaw, true));
-            UI::TreePop();
-        }
-
-        if (UI::TreeNode("submissions (weekly)", UI::TreeNodeFlags::Framed)) {
-            UI::Text(Json::Write(submissionsWeeklyRaw, true));
-            UI::TreePop();
-        }
+        UI::EndChild();
 
         UI::EndTabItem();
     }
