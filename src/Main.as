@@ -119,7 +119,7 @@ void RenderWindow() {
         UI::EndDisabled();
 
         if (summary.GetType() == Json::Type::Object) {
-            if (UI::TreeNode(pluginColor + "Track of the Day")) {
+            if (UI::TreeNode("Track of the Day", UI::TreeNodeFlags::Framed)) {
                 if (UI::BeginTable("##table-summary-totd", 2, UI::TableFlags::RowBg)) {
                     UI::PushStyleColor(UI::Col::TableRowBgAlt, vec4(vec3(), 0.5f));
                     UI::TableSetupColumn("Timeframe", UI::TableColumnFlags::WidthFixed, scale * 100.0f);
@@ -151,7 +151,7 @@ void RenderWindow() {
                 UI::TreePop();
             }
 
-            if (UI::TreeNode(pluginColor + "Weekly Shorts")) {
+            if (UI::TreeNode("Weekly Shorts", UI::TreeNodeFlags::Framed)) {
                 RenderWeeklyCounts("24 Hours", "1d");
                 RenderWeeklyCounts("7 Days",   "7d");
                 RenderWeeklyCounts("30 Days",  "30d");
@@ -221,17 +221,17 @@ void RenderWindow() {
         UI::Text("in totd review: "   + InMapReviewTotd());
         UI::Text("in weekly review: " + InMapReviewWeekly());
 
-        if (UI::TreeNode("\\$0FFsummary")) {
+        if (UI::TreeNode("summary", UI::TreeNodeFlags::Framed)) {
             UI::Text(Json::Write(summary, true));
             UI::TreePop();
         }
 
-        if (UI::TreeNode("\\$0FFsubmissions (totd)")) {
+        if (UI::TreeNode("submissions (totd)", UI::TreeNodeFlags::Framed)) {
             UI::Text(Json::Write(submissionsTotdRaw, true));
             UI::TreePop();
         }
 
-        if (UI::TreeNode("\\$0FFsubmissions (weekly)")) {
+        if (UI::TreeNode("submissions (weekly)", UI::TreeNodeFlags::Framed)) {
             UI::Text(Json::Write(submissionsWeeklyRaw, true));
             UI::TreePop();
         }
