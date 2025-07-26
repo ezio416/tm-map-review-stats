@@ -124,7 +124,7 @@ void RenderWindow() {
                     UI::PushStyleColor(UI::Col::TableRowBgAlt, vec4(vec3(), 0.5f));
                     UI::TableSetupColumn("Timeframe", UI::TableColumnFlags::WidthFixed, scale * 100.0f);
                     UI::TableSetupColumn("Total",     UI::TableColumnFlags::WidthFixed, scale * 50.0f);
-                    UI::TableHeadersRow();
+                    // UI::TableHeadersRow();
 
                     UI::TableNextRow();
                     UI::TableNextColumn();
@@ -152,61 +152,9 @@ void RenderWindow() {
             }
 
             if (UI::TreeNode(pluginColor + "Weekly Shorts")) {
-                if (UI::BeginTable("##table-summary-weekly", 6, UI::TableFlags::RowBg)) {
-                    UI::PushStyleColor(UI::Col::TableRowBgAlt, vec4(vec3(), 0.5f));
-                    UI::TableSetupColumn("Timeframe", UI::TableColumnFlags::WidthFixed, scale * 100.0f);
-                    UI::TableSetupColumn("#1",        UI::TableColumnFlags::WidthFixed, scale * 50.0f);
-                    UI::TableSetupColumn("#2",        UI::TableColumnFlags::WidthFixed, scale * 50.0f);
-                    UI::TableSetupColumn("#3",        UI::TableColumnFlags::WidthFixed, scale * 50.0f);
-                    UI::TableSetupColumn("#4",        UI::TableColumnFlags::WidthFixed, scale * 50.0f);
-                    UI::TableSetupColumn("#5",        UI::TableColumnFlags::WidthFixed, scale * 50.0f);
-                    UI::TableHeadersRow();
-
-                    UI::TableNextRow();
-                    UI::TableNextColumn();
-                    UI::Text("24 Hours");
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["w"]["1d"][0])));
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["w"]["1d"][1])));
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["w"]["1d"][2])));
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["w"]["1d"][3])));
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["w"]["1d"][4])));
-
-                    UI::TableNextRow();
-                    UI::TableNextColumn();
-                    UI::Text("7 Days");
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["w"]["7d"][0])));
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["w"]["7d"][1])));
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["w"]["7d"][2])));
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["w"]["7d"][3])));
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["w"]["7d"][4])));
-
-                    UI::TableNextRow();
-                    UI::TableNextColumn();
-                    UI::Text("30 Days");
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["w"]["30d"][0])));
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["w"]["30d"][1])));
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["w"]["30d"][2])));
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["w"]["30d"][3])));
-                    UI::TableNextColumn();
-                    UI::Text(tostring(int(summary["w"]["30d"][4])));
-
-                    UI::PopStyleColor();
-                    UI::EndTable();
-                }
+                RenderWeeklyCounts("24 Hours", "1d");
+                RenderWeeklyCounts("7 Days",   "7d");
+                RenderWeeklyCounts("30 Days",  "30d");
 
                 UI::TreePop();
             }
@@ -294,6 +242,47 @@ void RenderWindow() {
     UI::EndTabBar();
 }
 
+void RenderWeeklyCounts(const string&in name, const string&in key) {
+    UI::SeparatorText(name);
+
+    const int map1 = int(summary["w"][key][0]);
+    const int map2 = int(summary["w"][key][1]);
+    const int map3 = int(summary["w"][key][2]);
+    const int map4 = int(summary["w"][key][3]);
+    const int map5 = int(summary["w"][key][4]);
+
+    int max = Math::Max(map1, 1);
+    max = Math::Max(max, map2);
+    max = Math::Max(max, map3);
+    max = Math::Max(max, map4);
+    max = Math::Max(max, map5);
+
+    UI::Text("#1");
+    UI::SameLine();
+    const vec2 barSize = vec2(UI::GetContentRegionAvail().x, UI::GetScale() * 15.0f);
+    RenderWeeklyCountProgressBar(map1, max, barSize);
+
+    UI::Text("#2");
+    UI::SameLine();
+    RenderWeeklyCountProgressBar(map2, max, barSize);
+
+    UI::Text("#3");
+    UI::SameLine();
+    RenderWeeklyCountProgressBar(map3, max, barSize);
+
+    UI::Text("#4");
+    UI::SameLine();
+    RenderWeeklyCountProgressBar(map4, max, barSize);
+
+    UI::Text("#5");
+    UI::SameLine();
+    RenderWeeklyCountProgressBar(map5, max, barSize);
+}
+
+void RenderWeeklyCountProgressBar(const uint count, const uint max, const vec2 barSize) {
+    UI::ProgressBar(count > 0 ? Math::Max(float(count) / max, 0.005f) : 0.005f, barSize, count > 0 ? tostring(count) : "");
+}
+
 void RenderSubmission(Submission@ map) {
     string stars = pluginColor;
     if (map.countTotal == 0) {
@@ -345,5 +334,5 @@ void RenderSubmission(Submission@ map) {
 void RenderSubmissionProgressBar(const vec3 color, const uint count, const uint max, const vec2 barSize) {
     UI::PushStyleColor(UI::Col::PlotHistogram, vec4(color, 1.0f));
     UI::PushStyleColor(UI::Col::Text, vec4(vec3(count == max ? 0.0f : 1.0f), 1.0f));
-    UI::ProgressBar(count > 0 ? float(count) / max : 0.01f, barSize, count > 0 ? tostring(count) : "");
+    UI::ProgressBar(count > 0 ? Math::Max(float(count) / max, 0.005f) : 0.005f, barSize, count > 0 ? tostring(count) : "");
 }
