@@ -1,6 +1,12 @@
 // c 2025-07-25
 // m 2025-07-25
 
+enum ReviewType {
+    Totd,
+    Weekly,
+    None
+}
+
 class Submission {
     string   author;
     uint     authorTime                = 0;

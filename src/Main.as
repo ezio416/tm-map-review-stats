@@ -6,73 +6,13 @@ const string  pluginIcon  = Icons::Star;
 Meta::Plugin@ pluginMeta  = Meta::ExecutingPlugin();
 const string  pluginTitle = pluginColor + pluginIcon + "\\$G " + pluginMeta.Name;
 
-ReviewType    lastReviewType   = ReviewType::None;
-string        serverLogin;
 Submission@[] submissionsTotd;
 Json::Value   submissionsTotdRaw;
 Submission@[] submissionsWeekly;
 Json::Value   submissionsWeeklyRaw;
-Json::Value   summary;
-Token         token;
-bool          waitingForServer = false;
 
 void Main() {
-    OnEnabled();
-
-    yield(2);  // not exactly sure why I need to yield for 2 frames
-    while (token.getting) {
-        yield();
-    }
-
-    if (!token.valid) {
-        const string msg = "failed to get token, plugin is now inactive";
-        error(msg);
-        UI::ShowNotification(pluginTitle, msg, vec4(0.8f, 0.2f, 0.0f, 0.8f));
-        return;
-    }
-
     Http::Nadeo::InitAsync();
-
-    bool inReview, wasInReview = false;
-
-    while (true) {
-        sleep(1000);
-
-        if (!S_Enabled) {
-            inReview = false;
-            wasInReview = false;
-            continue;
-        }
-
-        inReview = InMapReview();
-        if (wasInReview != inReview) {
-            wasInReview = inReview;
-
-            if (inReview) {
-                trace("joined map review (" + tostring(lastReviewType) + ")");
-                startnew(OnJoinReviewAsync);
-            } else {
-                trace("left map review (" + tostring(lastReviewType) + ")");
-            }
-        }
-    }
-}
-
-void OnDestroyed() {
-    lastReviewType = ReviewType::None;
-    serverLogin = "";
-    token.Clear();
-    waitingForServer = false;
-    Intercept::Stop();
-}
-
-void OnDisabled() {
-    OnDestroyed();
-}
-
-void OnEnabled() {
-    token.Get();
-    Intercept::Start();
 }
 
 void Render() {
@@ -103,68 +43,7 @@ void RenderMenu() {
 }
 
 void RenderWindow() {
-    const float scale = UI::GetScale();
-
     UI::BeginTabBar("##tabs");
-
-    if (UI::BeginTabItem(Icons::ListOl + " Summary")) {
-        if (UI::BeginChild("##child-summary")) {
-            UI::BeginDisabled(false
-                or Http::requesting
-                or Time::Stamp - Http::lastSummaryGet < 60
-                or !token.valid
-            );
-            if (UI::Button((summary.GetType() == Json::Type::Unknown ? Icons::Download + " Get" : Icons::Refresh + " Refresh") + " Summary")) {
-                startnew(Http::GetSummaryAsync);
-            }
-            UI::EndDisabled();
-
-            if (summary.GetType() == Json::Type::Object) {
-                if (UI::TreeNode("Track of the Day", UI::TreeNodeFlags::Framed)) {
-                    if (UI::BeginTable("##table-summary-totd", 2, UI::TableFlags::RowBg)) {
-                        UI::PushStyleColor(UI::Col::TableRowBgAlt, vec4(vec3(), 0.5f));
-                        UI::TableSetupColumn("Timeframe", UI::TableColumnFlags::WidthFixed, scale * 100.0f);
-                        UI::TableSetupColumn("Total",     UI::TableColumnFlags::WidthFixed, scale * 50.0f);
-                        // UI::TableHeadersRow();
-
-                        UI::TableNextRow();
-                        UI::TableNextColumn();
-                        UI::Text("24 Hours");
-                        UI::TableNextColumn();
-                        UI::Text(tostring(int(summary["t"]["1d"])));
-
-                        UI::TableNextRow();
-                        UI::TableNextColumn();
-                        UI::Text("7 Days");
-                        UI::TableNextColumn();
-                        UI::Text(tostring(int(summary["t"]["7d"])));
-
-                        UI::TableNextRow();
-                        UI::TableNextColumn();
-                        UI::Text("30 Days");
-                        UI::TableNextColumn();
-                        UI::Text(tostring(int(summary["t"]["30d"])));
-
-                        UI::PopStyleColor();
-                        UI::EndTable();
-                    }
-
-                    UI::TreePop();
-                }
-
-                if (UI::TreeNode("Weekly Shorts", UI::TreeNodeFlags::Framed)) {
-                    RenderWeeklyCounts("24 Hours", "1d");
-                    RenderWeeklyCounts("7 Days",   "7d");
-                    RenderWeeklyCounts("30 Days",  "30d");
-
-                    UI::TreePop();
-                }
-            }
-        }
-        UI::EndChild();
-
-        UI::EndTabItem();
-    }
 
     if (UI::BeginTabItem(Icons::UserO + " My Submissions")) {
         UI::BeginTabBar("##tabs-mine");
@@ -220,22 +99,6 @@ void RenderWindow() {
         and UI::BeginTabItem(Icons::Bug + " Debug")
     ) {
         if (UI::BeginChild("##child-debug")) {
-            UI::Text("last review type: " + tostring(lastReviewType));
-            UI::Text("server login: "     + serverLogin);
-            UI::Text("token valid: "      + token.valid);
-            UI::Text("waiting: "          + waitingForServer);
-
-            UI::Separator();
-
-            UI::Text("in review: "        + InMapReview());
-            UI::Text("in totd review: "   + InMapReviewTotd());
-            UI::Text("in weekly review: " + InMapReviewWeekly());
-
-            if (UI::TreeNode("summary", UI::TreeNodeFlags::Framed)) {
-                UI::Text(Json::Write(summary, true));
-                UI::TreePop();
-            }
-
             if (UI::TreeNode("submissions (totd)", UI::TreeNodeFlags::Framed)) {
                 UI::Text(Json::Write(submissionsTotdRaw, true));
                 UI::TreePop();
@@ -252,47 +115,6 @@ void RenderWindow() {
     }
 
     UI::EndTabBar();
-}
-
-void RenderWeeklyCounts(const string&in name, const string&in key) {
-    UI::SeparatorText(name);
-
-    const int map1 = int(summary["w"][key][0]);
-    const int map2 = int(summary["w"][key][1]);
-    const int map3 = int(summary["w"][key][2]);
-    const int map4 = int(summary["w"][key][3]);
-    const int map5 = int(summary["w"][key][4]);
-
-    int max = Math::Max(map1, 1);
-    max = Math::Max(max, map2);
-    max = Math::Max(max, map3);
-    max = Math::Max(max, map4);
-    max = Math::Max(max, map5);
-
-    UI::Text("#1");
-    UI::SameLine();
-    const vec2 barSize = vec2(UI::GetContentRegionAvail().x, UI::GetScale() * 15.0f);
-    RenderWeeklyCountProgressBar(map1, max, barSize);
-
-    UI::Text("#2");
-    UI::SameLine();
-    RenderWeeklyCountProgressBar(map2, max, barSize);
-
-    UI::Text("#3");
-    UI::SameLine();
-    RenderWeeklyCountProgressBar(map3, max, barSize);
-
-    UI::Text("#4");
-    UI::SameLine();
-    RenderWeeklyCountProgressBar(map4, max, barSize);
-
-    UI::Text("#5");
-    UI::SameLine();
-    RenderWeeklyCountProgressBar(map5, max, barSize);
-}
-
-void RenderWeeklyCountProgressBar(const uint count, const uint max, const vec2 barSize) {
-    UI::ProgressBar(count > 0 ? Math::Max(float(count) / max, 0.005f) : 0.005f, barSize, count > 0 ? tostring(count) : "");
 }
 
 void RenderSubmission(Submission@ map) {
