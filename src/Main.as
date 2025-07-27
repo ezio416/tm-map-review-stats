@@ -6,6 +6,10 @@ const string  pluginIcon  = Icons::Star;
 Meta::Plugin@ pluginMeta  = Meta::ExecutingPlugin();
 const string  pluginTitle = pluginColor + pluginIcon + "\\$G " + pluginMeta.Name;
 
+const bool    hasEditPermission   = Permissions::OpenAdvancedMapEditor();
+const bool    hasPlayPermission   = Permissions::PlayLocalMap();
+const bool    hasReviewPermission = Permissions::AccessServerReview();
+bool          joiningMapReview    = false;
 Submission@[] submissionsTotd;
 Json::Value   submissionsTotdRaw;
 Submission@[] submissionsWeekly;
@@ -13,6 +17,12 @@ Json::Value   submissionsWeeklyRaw;
 
 void Main() {
     Http::Nadeo::InitAsync();
+}
+
+void OnSettingsChanged() {
+    if (S_MapsPerRow == 0) {
+        S_MapsPerRow = 1;
+    }
 }
 
 void Render() {

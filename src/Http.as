@@ -1,5 +1,5 @@
 // c 2025-07-25
-// m 2025-07-26
+// m 2025-07-27
 
 namespace Http {
     namespace Nadeo {
@@ -7,6 +7,43 @@ namespace Http {
         uint64       lastRequest  = 0;
         bool         requesting   = false;
         const uint64 waitTime     = 1000;
+
+        string GetReviewJoinLinkAsync(const ReviewType type) {
+            string url = NadeoServices::BaseURLLive() + "/api/token/map-review";
+
+            switch (type) {
+                case ReviewType::Totd:
+                    url += "/totd/connect";
+                    break;
+
+                case ReviewType::Weekly:
+                    url += "/weekly-shorts/connect";
+                    break;
+
+                default:
+                    warn("invalid review type: " + tostring(type));
+                    return "";
+            }
+
+            Net::HttpRequest@ req = NadeoServices::Get(audienceLive, url);
+            req.Start();
+            while (!req.Finished()) {
+                yield();
+            }
+
+            const int code = req.ResponseCode();
+            if (code != 200) {
+                warn("failed to get join link: " + code + " | " + req.String().Replace("\n", "\\n"));
+                return "";
+            }
+
+            try {
+                return string(req.Json()["joinLink"]);
+            } catch {
+                warn("failed to parse join link: " + getExceptionInfo() + " | " + req.String().Replace("\n", "\\n"));
+                return "";
+            }
+        }
 
         void GetMySubmissionsAsync(int64 type) {
             const int length = 144;
@@ -120,7 +157,7 @@ namespace Http {
             if (ret["submittedMaps"].GetType() == Json::Type::Array) {
                 for (uint i = 0; i < ret["submittedMaps"].Length; i++) {
                     try {
-                        auto map = Submission(ret["submittedMaps"][i]);
+                        auto map = Submission(ret["submittedMaps"][i], Type);
                         switch (Type) {
                             case ReviewType::Totd:
                                 submissionsTotd.InsertLast(map);
