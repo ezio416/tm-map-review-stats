@@ -22,7 +22,10 @@ void EditMapAsync(const string&in url) {
 }
 
 void JoinMapReviewAsync(int64 type) {
-    if (!hasReviewPermission) {
+    if (false
+        or !hasReviewPermission
+        or joiningMapReview
+    ) {
         return;
     }
 

@@ -17,10 +17,16 @@ void RenderSubmissionTab(const string&in name, Submission@[]@ maps, const Review
             }
 
             if (hasReviewPermission) {
+                const uint64 now = Time::Now;
+
                 UI::SameLine();
-                UI::BeginDisabled(joiningMapReview);
+                UI::BeginDisabled(false
+                    or joiningMapReview
+                    or now - joinMapReviewClicked < 15000
+                );
                 if (UI::Button(Icons::Server + " Join Map Review")) {
-                    startnew(JoinMapReviewAsync, int(type));
+                    joinMapReviewClicked = now;
+                    startnew(JoinMapReviewAsync, int64(type));
                 }
                 UI::EndDisabled();
             }

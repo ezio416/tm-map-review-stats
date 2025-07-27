@@ -6,10 +6,11 @@ const string  pluginIcon  = Icons::Star;
 Meta::Plugin@ pluginMeta  = Meta::ExecutingPlugin();
 const string  pluginTitle = pluginColor + pluginIcon + "\\$G " + pluginMeta.Name;
 
-const bool    hasEditPermission   = Permissions::OpenAdvancedMapEditor();
-const bool    hasPlayPermission   = Permissions::PlayLocalMap();
-const bool    hasReviewPermission = Permissions::AccessServerReview();
-bool          joiningMapReview    = false;
+const bool    hasEditPermission    = Permissions::OpenAdvancedMapEditor();
+const bool    hasPlayPermission    = Permissions::PlayLocalMap();
+const bool    hasReviewPermission  = Permissions::AccessServerReview();
+bool          joiningMapReview     = false;
+uint64        joinMapReviewClicked = 0;
 Submission@[] submissionsTotd;
 Json::Value   submissionsTotdRaw;
 Submission@[] submissionsWeekly;
