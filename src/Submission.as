@@ -235,12 +235,29 @@ class Submission {
         }
 
         string text = S_ColoredNames ? nameFormatted : nameStripped;
-        UI::SetCursorPosX(midPoint - Draw::MeasureString(text).x * 0.5f);
+        float textWidth = Draw::MeasureString(text).x;
+        if (textWidth > width) {
+            UI::PushTextWrapPos(pre.x + width);
+        } else {
+            UI::SetCursorPosX(midPoint - textWidth * 0.5f);
+        }
         UI::Text(text);
+        if (textWidth > width) {
+            UI::PopTextWrapPos();
+        }
 
-        text = stars + "\\$G " + Text::Format("%.1f", average) + " (" + countTotal + ")";
-        UI::SetCursorPosX(midPoint - Draw::MeasureString(text).x * 0.5f);
-        UI::Text(text);
+        const string starInfo = "\\$G " + Text::Format("%.1f", average) + " (" + countTotal + ")";
+        text = stars + starInfo;
+        textWidth = Draw::MeasureString(text).x;
+        if (textWidth > width) {
+            UI::SetCursorPosX(midPoint - Draw::MeasureString(stars).x * 0.5f);
+            UI::Text(stars);
+            UI::SetCursorPosX(midPoint - Draw::MeasureString(starInfo).x * 0.5f);
+            UI::Text(starInfo);
+        } else {
+            UI::SetCursorPosX(midPoint - textWidth * 0.5f);
+            UI::Text(text);
+        }
 
         const int max = Math::Max(countStarMax, 1);
         const vec2 barSize = vec2(width, UI::GetScale() * 15.0f);
@@ -253,25 +270,65 @@ class Submission {
         UI::PopStyleColor(10);
 
         if (S_Timestamps) {
-            text = "First submission:";
-            UI::SetCursorPosX(midPoint - Draw::MeasureString(text, UI::Font::DefaultBold).x * 0.5f);
             UI::PushFont(UI::Font::DefaultBold);
-            UI::Text(text);
+            string word1 = "First";
+            string word2 = "submission:";
+            text = word1 + " " + word2;
+            textWidth = Draw::MeasureString(text, UI::Font::DefaultBold).x;
+            if (textWidth > width) {
+                UI::SetCursorPosX(midPoint - Draw::MeasureString(word1, UI::Font::DefaultBold).x * 0.5f);
+                UI::Text(word1);
+                UI::SetCursorPosX(midPoint - Draw::MeasureString(word2, UI::Font::DefaultBold).x * 0.5f);
+                UI::Text(word2);
+            } else {
+                UI::SetCursorPosX(midPoint - textWidth * 0.5f);
+                UI::Text(text);
+            }
             UI::PopFont();
 
-            text = Time::FormatString("%F, %T", creationTimestamp);
-            UI::SetCursorPosX(midPoint - Draw::MeasureString(text).x * 0.5f);
-            UI::Text(text);
+            word1 = Time::FormatString("%F", creationTimestamp);
+            word2 = Time::FormatString("%T", creationTimestamp);
+            text = word1 + ", " + word2;
+            textWidth = Draw::MeasureString(text, UI::Font::DefaultBold).x;
+            if (textWidth > width) {
+                UI::SetCursorPosX(midPoint - Draw::MeasureString(word1, UI::Font::DefaultBold).x * 0.5f);
+                UI::Text(word1);
+                UI::SetCursorPosX(midPoint - Draw::MeasureString(word2, UI::Font::DefaultBold).x * 0.5f);
+                UI::Text(word2);
+            } else {
+                UI::SetCursorPosX(midPoint - textWidth * 0.5f);
+                UI::Text(text);
+            }
 
-            text = "Latest submission:";
-            UI::SetCursorPosX(midPoint - Draw::MeasureString(text, UI::Font::DefaultBold).x * 0.5f);
             UI::PushFont(UI::Font::DefaultBold);
-            UI::Text(text);
+            word1 = "Latest";
+            word2 = "submission:";
+            text = word1 + " " + word2;
+            textWidth = Draw::MeasureString(text, UI::Font::DefaultBold).x;
+            if (textWidth > width) {
+                UI::SetCursorPosX(midPoint - Draw::MeasureString(word1, UI::Font::DefaultBold).x * 0.5f);
+                UI::Text(word1);
+                UI::SetCursorPosX(midPoint - Draw::MeasureString(word2, UI::Font::DefaultBold).x * 0.5f);
+                UI::Text(word2);
+            } else {
+                UI::SetCursorPosX(midPoint - textWidth * 0.5f);
+                UI::Text(text);
+            }
             UI::PopFont();
 
-            text = Time::FormatString("%F, %T", latestSubmissionTimestamp);
-            UI::SetCursorPosX(midPoint - Draw::MeasureString(text).x * 0.5f);
-            UI::Text(text);
+            word1 = Time::FormatString("%F", latestSubmissionTimestamp);
+            word2 = Time::FormatString("%T", latestSubmissionTimestamp);
+            text = word1 + ", " + word2;
+            textWidth = Draw::MeasureString(text, UI::Font::DefaultBold).x;
+            if (textWidth > width) {
+                UI::SetCursorPosX(midPoint - Draw::MeasureString(word1, UI::Font::DefaultBold).x * 0.5f);
+                UI::Text(word1);
+                UI::SetCursorPosX(midPoint - Draw::MeasureString(word2, UI::Font::DefaultBold).x * 0.5f);
+                UI::Text(word2);
+            } else {
+                UI::SetCursorPosX(midPoint - textWidth * 0.5f);
+                UI::Text(text);
+            }
         }
 
         UI::EndGroup();
