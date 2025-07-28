@@ -246,6 +246,40 @@ class Submission {
             UI::PopTextWrapPos();
         }
 
+        if (true
+            and S_MapStyles
+            and mapStyles.Length > 0
+        ) {
+            UI::SetCursorPosX(midPoint - Draw::MeasureString("Map Styles").x * 0.5f - scale * 10.0f);
+            const vec4 buttonColor = vec4(0.43f, 1.0f, 0.63f, 1.0f);
+            UI::PushStyleColor(UI::Col::Button, buttonColor);
+            UI::PushStyleColor(UI::Col::ButtonActive, buttonColor);
+            UI::PushStyleColor(UI::Col::ButtonHovered, buttonColor);
+            UI::PushStyleColor(UI::Col::Text, vec4(vec3(), 1.0f));
+            UI::PushFont(UI::Font::DefaultBold);
+            UI::Button("Map Styles##" + mapUid);
+            UI::PopFont();
+            UI::PopStyleColor(4);
+            UI::SetTooltip(string::Join(mapStyles, "\n"));
+        }
+
+        if (true
+            and S_Reviewed
+            and labels.Find("Reviewed by Nadeo") > -1
+        ) {
+            UI::SetCursorPosX(midPoint - Draw::MeasureString("Reviewed").x * 0.5f - scale * 10.0f);
+            const vec4 buttonColor = vec4(1.0f, 0.88f, 0.55f, 1.0f);
+            UI::PushStyleColor(UI::Col::Button, buttonColor);
+            UI::PushStyleColor(UI::Col::ButtonActive, buttonColor);
+            UI::PushStyleColor(UI::Col::ButtonHovered, buttonColor);
+            UI::PushStyleColor(UI::Col::Text, vec4(vec3(), 1.0f));
+            UI::PushFont(UI::Font::DefaultBold);
+            UI::Button("Reviewed##" + mapUid);
+            UI::PopFont();
+            UI::PopStyleColor(4);
+            UI::SetTooltip(string::Join(labels, "\n"));
+        }
+
         const string starInfo = "\\$G " + Text::Format("%.1f", average) + " (" + countTotal + ")";
         text = stars + starInfo;
         textWidth = Draw::MeasureString(text).x;
@@ -262,12 +296,14 @@ class Submission {
         const int max = Math::Max(countStarMax, 1);
         const vec2 barSize = vec2(width, UI::GetScale() * 15.0f);
 
+        UI::PushFont(UI::Font::DefaultBold);
         RenderSubmissionProgressBar(vec3(0.47f, 0.79f, 0.63f), countStar5, max, barSize);
         RenderSubmissionProgressBar(vec3(0.68f, 0.85f, 0.53f), countStar4, max, barSize);
         RenderSubmissionProgressBar(vec3(1.0f, 0.85f, 0.21f),  countStar3, max, barSize);
         RenderSubmissionProgressBar(vec3(1.0f, 0.7f, 0.21f),   countStar2, max, barSize);
         RenderSubmissionProgressBar(vec3(1.0f, 0.55f, 0.35f),  countStar1, max, barSize);
         UI::PopStyleColor(10);
+        UI::PopFont();
 
         if (S_Timestamps) {
             UI::PushFont(UI::Font::DefaultBold);

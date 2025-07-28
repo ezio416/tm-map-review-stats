@@ -19,6 +19,12 @@ bool S_Buttons = true;
 [Setting category="General" name="Show map names in color"]
 bool S_ColoredNames = true;
 
+[Setting category="General" name="Show 'map styles' tags"]
+bool S_MapStyles = true;
+
+[Setting category="General" name="Show 'reviewed' tags"]
+bool S_Reviewed = true;
+
 [Setting category="General" name="Show submission timestamps" description="Shown in local time"]
 bool S_Timestamps = true;
 
