@@ -199,7 +199,7 @@ class Submission {
 
             UI::PushStyleColor(UI::Col::Button, vec4(vec3(), 0.9f));
 
-            if (UI::Button("\\$8FA" + Icons::Ubisoft + "##" + mapUid)) {
+            if (UI::Button("\\$AFC" + Icons::Ubisoft + "##" + mapUid)) {
                 OpenBrowserURL("https://trackmania.com/player/tracks/track-reviews/"
                     + (type == ReviewType::Totd ? "totd" : "weekly-shorts") + "/" + mapUid);
             }
@@ -214,7 +214,7 @@ class Submission {
 
             if (hasPlayPermission) {
                 UI::SetCursorPosX(pre.x + scale * 5.0f);
-                if (UI::Button("\\$C0C" + Icons::Play + "##" + mapUid)) {
+                if (UI::Button("\\$C6C" + Icons::Play + "##" + mapUid)) {
                     Play();
                 }
                 UI::SetItemTooltip("Play");
