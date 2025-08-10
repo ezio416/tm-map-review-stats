@@ -1,5 +1,5 @@
 // c 2025-07-25
-// m 2025-07-27
+// m 2025-08-10
 
 namespace Http {
     namespace Nadeo {
@@ -25,6 +25,7 @@ namespace Http {
                     return "";
             }
 
+            WaitAsync();
             Net::HttpRequest@ req = NadeoServices::Get(audienceLive, url);
             req.Start();
             while (!req.Finished()) {
@@ -181,11 +182,11 @@ namespace Http {
         }
 
         void WaitAsync() {
-            uint64 now;
-            while ((now = Time::Now) - lastRequest < waitTime) {
-                yield();
+            const uint64 now = Time::Now;
+            if (now - lastRequest < waitTime) {
+                sleep(lastRequest + waitTime - now);
             }
-            lastRequest = now;
+            lastRequest = Time::Now;
             requesting = true;
         }
     }
