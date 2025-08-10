@@ -1,5 +1,5 @@
 // c 2025-07-24
-// m 2025-07-27
+// m 2025-08-10
 
 [Setting category="General" name="Enabled"]
 bool S_Enabled = true;
@@ -10,8 +10,11 @@ bool S_HideWithGame = true;
 [Setting category="General" name="Show/hide with Openplanet UI"]
 bool S_HideWithOP = false;
 
+[Setting category="General" name="Get maps when plugin starts"]
+bool S_AutoGetMaps = true;
+
 [Setting category="General" name="Maps per row" min=1 max=10]
-uint S_MapsPerRow = 3;
+uint S_MapsPerRow = 5;
 
 [Setting category="General" name="Show buttons per map"]
 bool S_Buttons = true;

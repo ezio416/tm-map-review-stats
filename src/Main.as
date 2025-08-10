@@ -1,5 +1,5 @@
 // c 2025-07-24
-// m 2025-07-27
+// m 2025-08-10
 
 const string  pluginColor = "\\$EE0";
 const string  pluginIcon  = Icons::Star;
@@ -18,6 +18,11 @@ Json::Value   submissionsWeeklyRaw;
 
 void Main() {
     Http::Nadeo::InitAsync();
+
+    if (S_AutoGetMaps) {
+        Http::Nadeo::GetMySubmissionsAsync(int(ReviewType::Totd));
+        Http::Nadeo::GetMySubmissionsAsync(int(ReviewType::Weekly));
+    }
 }
 
 void OnSettingsChanged() {
