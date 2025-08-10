@@ -3,7 +3,7 @@
 
 # Map Review Stats
 
-Shows statistics from map review.
+Shows your map review submissions.
 
 <!-- ![Signed](https://img.shields.io/badge/Signed-Yes-00AA00) -->
 <!-- ![Signed](https://img.shields.io/badge/Signed-School_Mode-CC1199) -->
