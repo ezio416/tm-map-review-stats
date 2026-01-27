@@ -2,7 +2,7 @@
 name = "Map Review Stats"
 author = "Ezio"
 category = "Map Editor"
-version = "0.1.0"
+version = "0.2.0"
 siteid = 746
 
 [script]
