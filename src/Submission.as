@@ -232,7 +232,7 @@ class Submission {
         }
 
         string text = S_ColoredNames ? nameFormatted : nameStripped;
-        float textWidth = Draw::MeasureString(text).x;
+        float textWidth = UI::MeasureString(text).x;
         if (textWidth > width) {
             UI::PushTextWrapPos(pre.x + width);
         } else {
@@ -247,7 +247,7 @@ class Submission {
             and S_MapStyles
             and mapStyles.Length > 0
         ) {
-            UI::SetCursorPosX(midPoint - Draw::MeasureString("Map Styles").x * 0.5f - scale * 10.0f);
+            UI::SetCursorPosX(midPoint - UI::MeasureString("Map Styles").x * 0.5f - scale * 10.0f);
             const vec4 buttonColor = vec4(0.43f, 1.0f, 0.63f, 1.0f);
             UI::PushStyleColor(UI::Col::Button, buttonColor);
             UI::PushStyleColor(UI::Col::ButtonActive, buttonColor);
@@ -264,7 +264,7 @@ class Submission {
             and S_Reviewed
             and labels.Find("Reviewed by Nadeo") > -1
         ) {
-            UI::SetCursorPosX(midPoint - Draw::MeasureString("Reviewed").x * 0.5f - scale * 10.0f);
+            UI::SetCursorPosX(midPoint - UI::MeasureString("Reviewed").x * 0.5f - scale * 10.0f);
             const vec4 buttonColor = vec4(1.0f, 0.88f, 0.55f, 1.0f);
             UI::PushStyleColor(UI::Col::Button, buttonColor);
             UI::PushStyleColor(UI::Col::ButtonActive, buttonColor);
@@ -279,11 +279,11 @@ class Submission {
 
         const string starInfo = "\\$G " + Text::Format("%.1f", average) + " (" + countTotal + ")";
         text = stars + starInfo;
-        textWidth = Draw::MeasureString(text).x;
+        textWidth = UI::MeasureString(text).x;
         if (textWidth > width) {
-            UI::SetCursorPosX(midPoint - Draw::MeasureString(stars).x * 0.5f);
+            UI::SetCursorPosX(midPoint - UI::MeasureString(stars).x * 0.5f);
             UI::Text(stars);
-            UI::SetCursorPosX(midPoint - Draw::MeasureString(starInfo).x * 0.5f);
+            UI::SetCursorPosX(midPoint - UI::MeasureString(starInfo).x * 0.5f);
             UI::Text(starInfo);
         } else {
             UI::SetCursorPosX(midPoint - textWidth * 0.5f);
@@ -307,11 +307,11 @@ class Submission {
             string word1 = "First";
             string word2 = "submission:";
             text = word1 + " " + word2;
-            textWidth = Draw::MeasureString(text, UI::Font::DefaultBold).x;
+            textWidth = UI::MeasureString(text, UI::Font::DefaultBold).x;
             if (textWidth > width) {
-                UI::SetCursorPosX(midPoint - Draw::MeasureString(word1, UI::Font::DefaultBold).x * 0.5f);
+                UI::SetCursorPosX(midPoint - UI::MeasureString(word1, UI::Font::DefaultBold).x * 0.5f);
                 UI::Text(word1);
-                UI::SetCursorPosX(midPoint - Draw::MeasureString(word2, UI::Font::DefaultBold).x * 0.5f);
+                UI::SetCursorPosX(midPoint - UI::MeasureString(word2, UI::Font::DefaultBold).x * 0.5f);
                 UI::Text(word2);
             } else {
                 UI::SetCursorPosX(midPoint - textWidth * 0.5f);
@@ -322,11 +322,11 @@ class Submission {
             word1 = Time::FormatString("%F", creationTimestamp);
             word2 = Time::FormatString("%T", creationTimestamp);
             text = word1 + ", " + word2;
-            textWidth = Draw::MeasureString(text, UI::Font::DefaultBold).x;
+            textWidth = UI::MeasureString(text, UI::Font::DefaultBold).x;
             if (textWidth > width) {
-                UI::SetCursorPosX(midPoint - Draw::MeasureString(word1, UI::Font::DefaultBold).x * 0.5f);
+                UI::SetCursorPosX(midPoint - UI::MeasureString(word1, UI::Font::DefaultBold).x * 0.5f);
                 UI::Text(word1);
-                UI::SetCursorPosX(midPoint - Draw::MeasureString(word2, UI::Font::DefaultBold).x * 0.5f);
+                UI::SetCursorPosX(midPoint - UI::MeasureString(word2, UI::Font::DefaultBold).x * 0.5f);
                 UI::Text(word2);
             } else {
                 UI::SetCursorPosX(midPoint - textWidth * 0.5f);
@@ -337,11 +337,11 @@ class Submission {
             word1 = "Latest";
             word2 = "submission:";
             text = word1 + " " + word2;
-            textWidth = Draw::MeasureString(text, UI::Font::DefaultBold).x;
+            textWidth = UI::MeasureString(text, UI::Font::DefaultBold).x;
             if (textWidth > width) {
-                UI::SetCursorPosX(midPoint - Draw::MeasureString(word1, UI::Font::DefaultBold).x * 0.5f);
+                UI::SetCursorPosX(midPoint - UI::MeasureString(word1, UI::Font::DefaultBold).x * 0.5f);
                 UI::Text(word1);
-                UI::SetCursorPosX(midPoint - Draw::MeasureString(word2, UI::Font::DefaultBold).x * 0.5f);
+                UI::SetCursorPosX(midPoint - UI::MeasureString(word2, UI::Font::DefaultBold).x * 0.5f);
                 UI::Text(word2);
             } else {
                 UI::SetCursorPosX(midPoint - textWidth * 0.5f);
@@ -352,11 +352,11 @@ class Submission {
             word1 = Time::FormatString("%F", latestSubmissionTimestamp);
             word2 = Time::FormatString("%T", latestSubmissionTimestamp);
             text = word1 + ", " + word2;
-            textWidth = Draw::MeasureString(text, UI::Font::DefaultBold).x;
+            textWidth = UI::MeasureString(text, UI::Font::DefaultBold).x;
             if (textWidth > width) {
-                UI::SetCursorPosX(midPoint - Draw::MeasureString(word1, UI::Font::DefaultBold).x * 0.5f);
+                UI::SetCursorPosX(midPoint - UI::MeasureString(word1, UI::Font::DefaultBold).x * 0.5f);
                 UI::Text(word1);
-                UI::SetCursorPosX(midPoint - Draw::MeasureString(word2, UI::Font::DefaultBold).x * 0.5f);
+                UI::SetCursorPosX(midPoint - UI::MeasureString(word2, UI::Font::DefaultBold).x * 0.5f);
                 UI::Text(word2);
             } else {
                 UI::SetCursorPosX(midPoint - textWidth * 0.5f);
