@@ -1,6 +1,3 @@
-// c 2025-07-25
-// m 2025-08-10
-
 namespace Http {
     namespace Nadeo {
         const string audienceLive = "NadeoLiveServices";

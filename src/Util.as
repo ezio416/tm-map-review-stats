@@ -1,6 +1,3 @@
-// c 2025-07-27
-// m 2025-07-27
-
 void EditMapAsync(const string&in url) {
     if (!hasEditPermission) {
         warn("can't edit map: player doesn't have permission");

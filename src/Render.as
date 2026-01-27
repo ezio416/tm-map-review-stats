@@ -1,6 +1,3 @@
-// c 2025-07-27
-// m 2025-07-27
-
 void RenderSubmissionTab(const string&in name, Submission@[]@ maps, const ReviewType type) {
     if (UI::BeginTabItem(name)) {
         if (UI::BeginChild("##child-" + name)) {

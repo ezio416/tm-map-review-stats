@@ -1,6 +1,3 @@
-// c 2025-07-25
-// m 2025-07-27
-
 enum ReviewType {
     Totd,
     Weekly,
