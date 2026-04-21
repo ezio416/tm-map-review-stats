@@ -257,7 +257,7 @@ class Submission {
             UI::Button("Map Styles##" + mapUid);
             UI::PopFont();
             UI::PopStyleColor(4);
-            UI::SetTooltip(string::Join(mapStyles, "\n"));
+            UI::SetTooltip(Text::Join(mapStyles, "\n"));
         }
 
         if (true
@@ -274,7 +274,7 @@ class Submission {
             UI::Button("Reviewed##" + mapUid);
             UI::PopFont();
             UI::PopStyleColor(4);
-            UI::SetTooltip(string::Join(labels, "\n"));
+            UI::SetTooltip(Text::Join(labels, "\n"));
         }
 
         const string starInfo = "\\$G " + Text::Format("%.1f", average) + " (" + countTotal + ")";
